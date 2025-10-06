@@ -1,0 +1,67 @@
+Conversational RAG Chatbot - Project Overview
+=============================================
+
+This project is a Conversational Retrieval-Augmented Generation (RAG) chatbot built with Streamlit, LangChain, Hugging Face sentence-transformers, ChromaDB, and Ollama (for LLM inference). It allows users to upload PDF/TXT documents, ingest them into a vector database, and chat with the bot about the content of those documents.
+
+How the Code Works
+------------------
+
+1. **app.py**
+   - The main Streamlit UI file.
+   - Lets users upload PDF/TXT files and ingest them into the vector database.
+   - Provides a chat interface for users to ask questions about their documents.
+   - Calls the ingestion and RAG agent tools to process user actions.
+
+2. **ingest_agent.py**
+   - Handles document ingestion and embedding.
+   - Extracts text from PDF/TXT files (using PyMuPDF for PDFs).
+   - Splits text into manageable chunks.
+   - Uses Hugging Face's sentence-transformers (MiniLM) to generate embeddings for each chunk.
+   - Stores chunks and embeddings in ChromaDB with unique IDs for retrieval.
+
+3. **rag_agent.py**
+   - Implements the RAG (Retrieval-Augmented Generation) agent.
+   - When a user asks a question, it:
+     a. Encodes the question using the same embedding model.
+     b. Queries ChromaDB for the most relevant document chunks.
+     c. Constructs a prompt with the retrieved context and the user's question.
+     d. Sends the prompt to Ollama (running a local Llama model) for answer generation.
+   - Returns the answer to the user via the Streamlit UI.
+
+4. **ChromaDB**
+   - Acts as the vector database for storing and retrieving document chunks and their embeddings.
+   - Supports similarity search for efficient retrieval of relevant context.
+
+5. **Ollama**
+   - Runs a local LLM (e.g., Llama 3) and exposes an API endpoint.
+   - LangChain's Ollama integration is used to send prompts and receive answers.
+
+6. **Hugging Face sentence-transformers**
+   - Used for generating embeddings for both document chunks and user queries.
+   - Ensures that retrieval is based on semantic similarity.
+
+Typical Workflow
+----------------
+1. User uploads PDF/TXT files via the Streamlit UI.
+2. Files are ingested: text is extracted, chunked, embedded, and stored in ChromaDB.
+3. User asks a question in the chat interface.
+4. The question is embedded and used to retrieve relevant chunks from ChromaDB.
+5. Retrieved context + question are sent to Ollama for answer generation.
+6. The answer is displayed to the user.
+
+Key Features
+------------
+- No cloud API keys required for embeddings or LLM (everything runs locally).
+- Supports PDF and TXT document ingestion.
+- Uses modern, efficient embedding and retrieval techniques.
+- Leverages local LLMs for privacy and cost savings.
+
+To Run the Project
+------------------
+1. Install Python 3.13+ and required packages (see requirements.txt).
+2. Install Ollama and pull a Llama model (e.g., `ollama pull llama3`).
+3. Start Ollama (`ollama run llama3`).
+4. Run the Streamlit app (`streamlit run app.py`).
+5. Upload documents and start chatting!
+
+For more details, see the comments in each code file.

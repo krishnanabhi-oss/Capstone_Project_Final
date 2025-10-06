@@ -1,0 +1,71 @@
+Conversational RAG Chatbot - Layperson's Guide
+==============================================
+
+This guide explains the project and its concepts in simple terms, so anyone can understand how it works and why each part is important.
+
+What is RAG?
+------------
+RAG stands for Retrieval-Augmented Generation. It's a way to make chatbots smarter by letting them look up information in documents before answering your questions. Instead of just guessing, the bot finds relevant facts and uses them to give better answers.
+
+Why Use RAG?
+------------
+- Regular chatbots (like ChatGPT) only know what they've been trained on.
+- RAG lets the bot "read" your documents and answer questions about them, even if those documents are new or private.
+- This means you can ask about your own PDFs, reports, or notes, and get accurate answers.
+
+What are Agents?
+----------------
+- In this project, an "agent" is a piece of code that knows how to do a specific job (like ingesting documents or answering questions).
+- Agents make the code modular and flexible, so you can add new abilities easily.
+- For example, one agent handles uploading and storing documents, another agent handles answering questions.
+
+What is Embedding?
+------------------
+- Computers can't understand text the way humans do. So, we convert text into numbers (called "embeddings") that capture the meaning of the words.
+- Embeddings are like fingerprints for sentences: similar sentences have similar embeddings.
+- This helps the bot find which parts of your documents are most relevant to your question.
+
+What is a Vector Database?
+--------------------------
+- A vector database stores these embeddings (the number fingerprints) for all your document chunks.
+- When you ask a question, the bot turns your question into an embedding and searches the database for the most similar ones.
+- This is much faster and smarter than searching for exact words.
+
+What are Chunks?
+----------------
+- Documents can be long, so we break them into smaller pieces called "chunks" (e.g., 500 characters each).
+- Each chunk is embedded and stored separately, so the bot can find and use just the relevant parts.
+
+How Does the Chatbot Work?
+--------------------------
+1. You upload PDF or TXT files using the web interface.
+2. The bot extracts text from your files and splits it into chunks.
+3. Each chunk is converted into an embedding and stored in the vector database.
+4. When you ask a question, your question is also converted into an embedding.
+5. The bot searches the database for the most relevant chunks.
+6. It combines those chunks with your question and sends them to a local AI model (Llama) to generate an answer.
+7. The answer is shown to you in the chat.
+
+Why Use Local AI and Vector DB?
+-------------------------------
+- Privacy: Your documents never leave your computer.
+- Cost: No need to pay for cloud APIs.
+- Speed: Everything runs locally, so it's fast.
+
+What is Ollama?
+---------------
+- Ollama is a tool that lets you run powerful AI models (like Llama) on your own computer.
+- The chatbot uses Ollama to generate answers based on your documents and questions.
+
+What is Streamlit?
+------------------
+- Streamlit is a tool for building simple web apps in Python.
+- It provides the user interface for uploading files and chatting with the bot.
+
+Summary of the Code Files
+-------------------------
+- **app.py**: The main web interface. Handles uploads and chat.
+- **ingest_agent.py**: Extracts text, chunks it, creates embeddings, and stores them in the vector database.
+- **rag_agent.py**: Finds relevant chunks for your question and asks the AI model for an answer.
+
+In short, this chatbot lets you "talk" to your own documents. It finds the right information and uses AI to answer your questions, all on your own computer, safely and quickly.

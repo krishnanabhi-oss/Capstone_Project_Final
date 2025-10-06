@@ -1,0 +1,7 @@
+streamlit>=1.29.0
+pymupdf>=1.23.6
+chromadb>=0.4.22
+langchain>=0.1.17
+langchain-community>=0.0.29
+sentence-transformers>=2.2.2
+# Ollama is a separate install (https://ollama.com/download)

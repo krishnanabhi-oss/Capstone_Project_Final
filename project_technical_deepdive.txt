@@ -1,0 +1,92 @@
+Conversational RAG Chatbot - Technical Deep Dive
+===============================================
+
+This document provides a technical deep dive into the architecture, code structure, and key components of the Conversational RAG Chatbot project.
+
+1. Streamlit UI (app.py)
+------------------------
+- **Purpose:** Provides a web interface for document upload, ingestion, and conversational chat.
+- **Key Functions:**
+  - `st.file_uploader`: Allows users to upload PDF/TXT files.
+  - `ingest_tool.func(uploaded_files)`: Triggers document ingestion pipeline.
+  - `rag_tool.func(query)`: Handles user queries and returns answers.
+- **Design:**
+  - Modular sections for document upload and chat.
+  - Uses LangChain tools for clean separation of ingestion and RAG logic.
+
+2. Document Ingestion (ingest_agent.py)
+---------------------------------------
+- **Text Extraction:**
+  - PDFs: Uses PyMuPDF (`fitz`) to extract text from uploaded PDF files.
+  - TXTs: Reads and decodes text files directly.
+- **Chunking:**
+  - Splits extracted text into fixed-size chunks (default: 500 characters) for efficient embedding and retrieval.
+- **Embedding:**
+  - Uses Hugging Face's `sentence-transformers` (MiniLM) to generate dense vector embeddings for each chunk.
+- **Vector DB Storage:**
+  - Stores each chunk and its embedding in ChromaDB with a unique ID (`{file.name}_{i}`) for later retrieval.
+- **LangChain Tool:**
+  - Wraps the ingestion pipeline as a LangChain Tool for agent workflows.
+
+3. Retrieval-Augmented Generation (rag_agent.py)
+------------------------------------------------
+- **Query Embedding:**
+  - Encodes user queries using the same embedding model as for document chunks.
+- **Similarity Search:**
+  - Uses ChromaDB's `query_embeddings` to find the top-k most relevant document chunks based on cosine similarity.
+- **Prompt Construction:**
+  - Concatenates retrieved chunks as context and combines with the user's question to form the LLM prompt.
+- **LLM Inference:**
+  - Uses LangChain's Ollama integration to send the prompt to a local Llama model (via Ollama API at `http://localhost:11434`).
+  - Handles errors gracefully and returns the generated answer.
+- **LangChain Tool:**
+  - Wraps the RAG pipeline as a LangChain Tool for agent workflows.
+
+4. ChromaDB
+------------
+- **Role:** Acts as the vector database for storing and retrieving document chunks and their embeddings.
+- **API Usage:**
+  - `get_or_create_collection`: Ensures a persistent collection for all document chunks.
+  - `add`: Stores embeddings, documents, and IDs.
+  - `query`: Retrieves relevant chunks for a given query embedding.
+- **Advantages:**
+  - Fast similarity search, scalable, and easy to use with LangChain.
+
+5. Hugging Face sentence-transformers
+-------------------------------------
+- **Role:** Provides state-of-the-art embedding models for semantic search.
+- **Model Used:** `all-MiniLM-L6-v2` (small, fast, and high-quality for retrieval tasks).
+- **Usage:**
+  - `model.encode(texts)`: Converts text chunks and queries into dense vectors.
+
+6. Ollama (LLM Backend)
+-----------------------
+- **Role:** Runs a local LLM (e.g., Llama 3) and exposes an API endpoint for inference.
+- **Integration:**
+  - LangChain's `Ollama` class connects to the Ollama server and sends prompts for answer generation.
+- **Benefits:**
+  - No cloud API keys required, privacy-preserving, and cost-effective.
+
+7. Data Flow Summary
+--------------------
+- User uploads documents → Text is extracted and chunked → Chunks are embedded and stored in ChromaDB.
+- User asks a question → Query is embedded → ChromaDB retrieves relevant chunks → Context + question sent to Ollama → LLM generates answer → Answer shown in UI.
+
+8. Extensibility & Customization
+-------------------------------
+- **Chunk Size:** Adjustable in `ingest_agent.py` for different document types.
+- **Embedding Model:** Swap out for other Hugging Face models as needed.
+- **LLM Backend:** Can use other local or cloud LLMs (OpenAI, Hugging Face Inference API, etc.) by changing the LangChain integration.
+- **Vector DB:** ChromaDB can be replaced with other vector stores (FAISS, Pinecone, etc.) if desired.
+
+9. Error Handling & Robustness
+------------------------------
+- Graceful error messages for failed ingestion, missing context, or LLM errors.
+- Modular code structure for easy debugging and extension.
+
+10. Security & Privacy
+----------------------
+- All embeddings and LLM inference are performed locally; no document data leaves the user's machine.
+- No external API keys required for core functionality.
+
+For further details, see the inline comments in each code file.
