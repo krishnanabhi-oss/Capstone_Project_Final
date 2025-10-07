@@ -6,7 +6,7 @@
 - **pymupdf**: Extracts text and metadata from PDF files. Used for document ingestion and processing.
 - **chromadb**: A vector database for storing and searching embeddings efficiently. Enables fast semantic search and retrieval.
 - **langchain**: Framework for building applications with language models, including chaining, retrieval, and agent management.
-- **langchain-community**: Community-contributed integrations and tools for LangChain, expanding its capabilities.
+**langchain-community**: Community-contributed integrations and tools for LangChain, expanding its capabilities.
 **sentence-transformers (Hugging Face)**: Provides embedding models for converting text into numerical vectors for semantic search.
 **llama-cpp-python**: Python bindings for running Llama language models locally, enabling private and efficient AI inference (via Ollama integration).
 
@@ -46,26 +46,23 @@
 4. User receives the answer via the interface
 
 ## Technologies
-## Technologies
 - Python
-- AI/NLP libraries (langchain, openai, llama-cpp-python, nomic)
+- AI/NLP libraries (LangChain, sentence-transformers, llama-cpp-python)
 - PDF text extraction tools (PyMuPDF)
 - Vector database (ChromaDB)
 - Streamlit for UI
 - Virtual environment
-Virtual environment
+
 ## Why These Packages Are Used
-- **langchain**: Provides tools for building language model applications, including document retrieval and chaining multiple AI components. Used for implementing RAG and managing interactions between agents and models.
-- **openai**: Connects to powerful language models (like GPT) for generating answers and processing natural language. Used for question answering and summarization.
-- **llama-cpp-python**: Enables running Llama models locally for private inference.
-- **nomic**: Used for generating text embeddings for semantic search.
-- **chromadb**: Stores and searches embeddings efficiently for fast retrieval.
-- **pymupdf**: Extracts text from PDF documents, enabling ingestion and processing of user-provided files.
-- **streamlit**: Provides the user interface for document upload and Q&A.
-- **openai**: Connects to powerful language models (like GPT) for generating answers and processing natural language. Used for question answering and summarization.
+**langchain**: Provides tools for building language model applications, including document retrieval and chaining multiple AI components. Used for implementing RAG and managing interactions between agents and models.
+**sentence-transformers (Hugging Face)**: Used for generating text embeddings for semantic search.
+**llama-cpp-python**: Enables running Llama models locally for private inference (via Ollama integration in LangChain).
+**chromadb**: Stores and searches embeddings efficiently for fast retrieval.
+**pymupdf**: Extracts text from PDF documents, enabling ingestion and processing of user-provided files.
+**streamlit**: Provides the user interface for document upload and Q&A.
 ### Agent Design
-- **Ingest Agent**: Reads documents, extracts and cleans text, splits into manageable chunks, embeds them, and stores them in a vector database for retrieval. Ensures that information is accessible and searchable.
-- **RAG Agent**: Handles user queries by embedding the query, retrieving relevant document chunks from the vector database, and using a language model to generate accurate, context-aware answers.
+**Ingest Agent**: Reads documents, extracts and cleans text, splits into manageable chunks, embeds them using Hugging Face sentence-transformers, and stores them in a vector database for retrieval. Ensures that information is accessible and searchable.
+**RAG Agent**: Handles user queries by embedding the query (using sentence-transformers), retrieving relevant document chunks from the vector database, and using a language model (Llama via Ollama integration) to generate accurate, context-aware answers.
 
 ## Agent and RAG Details
 ## Why Agents Are Used
@@ -86,7 +83,7 @@ Agents are used to modularize and organize the system’s functionality. Each ag
 - **RAG Agent**: Handles user queries by retrieving relevant document chunks and using a language model to generate accurate, context-aware answers.
 
 ### Retrieval-Augmented Generation (RAG)
-- RAG combines document retrieval with AI generation. When a user asks a question, the system first searches for the most relevant parts of the ingested documents. Then, it uses a language model (like GPT) to generate a response based on both the retrieved information and its own knowledge.
+RAG combines document retrieval with AI generation. When a user asks a question, the system first searches for the most relevant parts of the ingested documents. Then, it uses a language model (Llama via Ollama) to generate a response based on both the retrieved information and its own knowledge.
 - This approach improves accuracy and relevance, especially for questions about specific documents.
 ## Embedding Usage in the Project
 
@@ -94,23 +91,24 @@ Embeddings are a core part of this project, enabling semantic search and retriev
 
 ### Where Embedding Is Used
 
-- **In `ingest_agent.py`:**
-		- Uses `nomic.embed` to convert document chunks into embeddings (numerical vectors).
+**In `ingest_agent.py`:**
+		- Uses Hugging Face sentence-transformers to convert document chunks into embeddings (numerical vectors).
 		- Stores these embeddings in a vector database (`chromadb`) for efficient retrieval.
 		- Example:
 			```python
-			embeddings = embed.text(chunks)
+			model = SentenceTransformer('all-MiniLM-L6-v2')
+			embeddings = model.encode(chunks)
 			for chunk, embedding in zip(chunks, embeddings):
-					collection.add(embeddings=[embedding], documents=[chunk])
+				collection.add(embeddings=[embedding], documents=[chunk])
 			```
 		- **Purpose:** Allows the system to search for semantically similar document chunks when answering questions.
 
-- **In `rag_agent.py`:**
-		- Embeds user queries using `nomic.embed`.
+**In `rag_agent.py`:**
+		- Embeds user queries using Hugging Face sentence-transformers.
 		- Compares query embedding to stored document embeddings to find the most relevant information.
 		- Example:
 			```python
-			query_embedding = embed.text([query])[0]
+			query_embedding = model.encode([query])[0]
 			results = collection.query(embeddings=[query_embedding], n_results=top_k)
 			```
 		- **Purpose:** Enables semantic search and retrieval for the RAG process.
@@ -161,8 +159,6 @@ A language model is an AI system trained to understand and generate human langua
 ### User Interface
 The user interface is how users interact with the system. In this project, Streamlit is used to create a simple and interactive web app for users to upload documents and ask questions.
 
-### Environment Variable
-An environment variable is a value stored outside the code, often used for configuration and secrets (like API keys). The `python-dotenv` package loads these from a `.env` file to keep sensitive information secure and separate from the codebase.
 
 ### Inference
 Inference is the process of running a trained AI model to generate predictions, answers, or summaries based on new input data. In this project, inference happens when the language model generates responses to user questions.
